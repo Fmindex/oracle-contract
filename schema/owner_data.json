@@ -1,16 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "State",
+  "title": "OwnerData",
   "type": "object",
   "required": [
-    "count",
     "owner"
   ],
   "properties": {
-    "count": {
-      "type": "integer",
-      "format": "int32"
-    },
     "owner": {
       "$ref": "#/definitions/Addr"
     }

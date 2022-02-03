@@ -5,11 +5,19 @@
     {
       "type": "object",
       "required": [
-        "get_count"
+        "get_price"
       ],
       "properties": {
-        "get_count": {
-          "type": "object"
+        "get_price": {
+          "type": "object",
+          "required": [
+            "symbol"
+          ],
+          "properties": {
+            "symbol": {
+              "type": "string"
+            }
+          }
         }
       },
       "additionalProperties": false

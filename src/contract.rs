@@ -49,6 +49,11 @@ pub fn try_set_price(deps: DepsMut, info: MessageInfo, symbol: String, price: Ui
         return Err(ContractError::Unauthorized {});
     }
 
+    // validate zero (Assume price cannot be zero)
+    if price == Uint128::zero() {
+        return Err(ContractError::InvalidZeroAmount {});
+    }
+
     // update price
     PRICES.update(deps.storage, symbol, |mut _prices| -> Result<_, ContractError> {
         Ok(price)
