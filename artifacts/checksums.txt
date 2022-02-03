@@ -1,0 +1,1 @@
+4d671d54cdaaf8b6c84d99ec55c59f7c54a3076c2ab11c1f63a5258c03af0aa0  oracle_contract.wasm
