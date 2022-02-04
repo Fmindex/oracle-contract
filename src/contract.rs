@@ -1,11 +1,13 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
-use cosmwasm_std::{to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult, StdError};
-use cosmwasm_std::{Uint128};
+use cosmwasm_std::Uint128;
+use cosmwasm_std::{
+    to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult,
+};
 use cw2::set_contract_version;
 
 use crate::error::ContractError;
-use crate::msg::{GetPriceResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
+use crate::msg::{ExecuteMsg, GetPriceResponse, InstantiateMsg, QueryMsg};
 use crate::state::{OwnerData, OWNER_INFO, PRICES};
 
 // version info for migration info
@@ -42,7 +44,12 @@ pub fn execute(
     }
 }
 
-pub fn try_set_price(deps: DepsMut, info: MessageInfo, symbol: String, price: Uint128) -> Result<Response, ContractError> {
+pub fn try_set_price(
+    deps: DepsMut,
+    info: MessageInfo,
+    symbol: String,
+    price: Uint128,
+) -> Result<Response, ContractError> {
     // check authorization
     let owner_data = OWNER_INFO.load(deps.storage).unwrap();
     if info.sender != owner_data.owner {
@@ -55,9 +62,11 @@ pub fn try_set_price(deps: DepsMut, info: MessageInfo, symbol: String, price: Ui
     }
 
     // update price
-    PRICES.update(deps.storage, symbol, |mut _prices| -> Result<_, ContractError> {
-        Ok(price)
-    })?;
+    PRICES.update(
+        deps.storage,
+        symbol,
+        |mut _prices| -> Result<_, ContractError> { Ok(price) },
+    )?;
     Ok(Response::new().add_attribute("method", "reset"))
 }
 
@@ -73,7 +82,9 @@ fn query_get_price(deps: Deps, symbol: String) -> StdResult<GetPriceResponse> {
     if price == Ok(None) {
         return Err(StdError::not_found("Symbol"));
     }
-    Ok(GetPriceResponse { price: price.unwrap().unwrap_or_default() })
+    Ok(GetPriceResponse {
+        price: price.unwrap().unwrap_or_default(),
+    })
 }
 
 #[cfg(test)]
@@ -93,7 +104,7 @@ mod tests {
         let res = instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
         assert_eq!(0, res.messages.len());
     }
-    
+
     #[test]
     fn set_price() {
         let mut deps = mock_dependencies(&coins(2, "token"));
@@ -104,7 +115,10 @@ mod tests {
 
         // beneficiary can release it
         let unauth_info = mock_info("anyone", &coins(2, "token"));
-        let msg = ExecuteMsg::SetPrice { symbol: "LUNA".to_string(), price: Uint128::new(1000000) };
+        let msg = ExecuteMsg::SetPrice {
+            symbol: "LUNA".to_string(),
+            price: Uint128::new(1000000),
+        };
         let res = execute(deps.as_mut(), mock_env(), unauth_info, msg);
         match res {
             Err(ContractError::Unauthorized {}) => {}
@@ -113,17 +127,30 @@ mod tests {
 
         // only the original creator can update the price
         let auth_info = mock_info("creator", &coins(2, "token"));
-        let msg = ExecuteMsg::SetPrice { symbol: "LUNA".to_string(), price: Uint128::new(1000000) };
+        let msg = ExecuteMsg::SetPrice {
+            symbol: "LUNA".to_string(),
+            price: Uint128::new(1000000),
+        };
         let _res = execute(deps.as_mut(), mock_env(), auth_info, msg).unwrap();
 
         // should now be "1000000"
-        let res = query(deps.as_ref(), mock_env(), QueryMsg::GetPrice { symbol: "LUNA".to_string() }).unwrap();
+        let res = query(
+            deps.as_ref(),
+            mock_env(),
+            QueryMsg::GetPrice {
+                symbol: "LUNA".to_string(),
+            },
+        )
+        .unwrap();
         let value: GetPriceResponse = from_binary(&res).unwrap();
         assert_eq!(Uint128::new(1000000), value.price);
 
         // price cannot be 0
         let unauth_info = mock_info("creator", &coins(2, "token"));
-        let msg = ExecuteMsg::SetPrice { symbol: "LUNA".to_string(), price: Uint128::new(0) };
+        let msg = ExecuteMsg::SetPrice {
+            symbol: "LUNA".to_string(),
+            price: Uint128::new(0),
+        };
         let res = execute(deps.as_mut(), mock_env(), unauth_info, msg);
         match res {
             Err(ContractError::InvalidZeroAmount {}) => {}
