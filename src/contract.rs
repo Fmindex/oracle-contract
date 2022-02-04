@@ -67,7 +67,7 @@ pub fn try_set_price(
         symbol,
         |mut _prices| -> Result<_, ContractError> { Ok(price) },
     )?;
-    Ok(Response::new().add_attribute("method", "reset"))
+    Ok(Response::new().add_attribute("method", "set_price"))
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
